@@ -112,7 +112,18 @@ export default {
     // Fetch restaurants when the component is mounted
     this.getAllRestaurants();
   },
+  computed: {
+    sortedRestaurants() {
+      return this.restaurants.slice().sort((a, b) => {
+        const sortKey = this.sortKey;
+        const sortOrder = this.sortOrder === 'asc' ? 1 : -1;
 
+        if (a[sortKey] < b[sortKey]) return -sortOrder;
+        if (a[sortKey] > b[sortKey]) return sortOrder;
+        return 0;
+      });
+    },
+  }
 };
 </script>
 
