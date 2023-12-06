@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup lang="js">
 </script>
 
 <template>
@@ -31,7 +31,7 @@
     </table>
 
     <!-- Component? -->
-    <form @submit.prevent="isUpdating ? updateRestaurant(selectedRestaurant.id) : saveRestaurant">
+    <form @submit.prevent="isUpdating ? updateRestaurant(selectedRestaurant.id) : saveRestaurant()">
       <label>Name:</label>
       <input v-model="newRestaurant.name" required />
 
