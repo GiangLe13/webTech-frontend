@@ -21,7 +21,7 @@
         <td>{{ restaurant.name }}</td>
         <td>{{ restaurant.district }}</td>
         <td>{{ restaurant.address }}</td>
-        <td>{{ restaurant.category }}</td>
+        <td>{{ restaurant.category.replace('_', ' ') }}</td>
         <td>
           <button @click="preUpdateRestaurant(restaurant.id)">Edit</button>
           <button @click="deleteRestaurant(restaurant.id)">Delete</button>
@@ -32,21 +32,29 @@
 
     <!-- Component? -->
     <form @submit.prevent="isUpdating ? updateRestaurant(selectedRestaurant.id) : saveRestaurant()">
+      <div>
       <label>Name:</label>
       <input v-model="newRestaurant.name" required />
+      </div>
 
-      <label>District:</label>
-      <input v-model="newRestaurant.district" required />
+      <div>
+        <label>District:</label>
+        <input v-model="newRestaurant.district" required />
+      </div>
 
-      <label>Address:</label>
-      <input v-model="newRestaurant.address" required />
+      <div>
+        <label>Address:</label>
+        <input v-model="newRestaurant.address" required />
+      </div>
 
-      <label>Category:</label>
-      <select v-model="newRestaurant.category" required>
-        <option v-for="category in categoryOptions" :key="category" :value="category">
-          {{ category.replace('_', ' ') }}
-        </option>
-      </select>
+      <div>
+        <label>Category:</label>
+        <select v-model="newRestaurant.category" required>
+          <option v-for="category in categoryOptions" :key="category" :value="category">
+            {{ category.replace('_', ' ') }}
+          </option>
+        </select>
+      </div>
 
       <button type="submit">{{ isUpdating ? 'Update' : 'Add' }}</button>
     </form>
