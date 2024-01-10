@@ -4,6 +4,38 @@
 <template>
   <div>
     <h1>Restaurants</h1>
+
+    <p>Add a new restaurant:</p>
+    <!-- Component? -->
+    <form @submit.prevent="isUpdating ? updateRestaurant(selectedRestaurant.id) : saveRestaurant()">
+      <div>
+        <label>Name:</label>
+        <input v-model="newRestaurant.name" required />
+      </div>
+
+      <div>
+        <label>District:</label>
+        <input v-model="newRestaurant.district" required />
+      </div>
+
+      <div>
+        <label>Address:</label>
+        <input v-model="newRestaurant.address" required />
+      </div>
+
+      <div>
+        <label>Category:</label>
+        <select v-model="newRestaurant.category" required>
+          <option v-for="category in categoryOptions" :key="category" :value="category">
+            {{ category.replace('_', ' ') }}
+          </option>
+        </select>
+      </div>
+
+      <button type="submit">{{ isUpdating ? 'Update' : 'Add' }}</button>
+      <button type="button" @click="resetForm">Cancel</button>
+    </form>
+
     <table class="table">
       <thead>
       <tr>
@@ -30,34 +62,6 @@
       </tbody>
     </table>
 
-    <!-- Component? -->
-    <form @submit.prevent="isUpdating ? updateRestaurant(selectedRestaurant.id) : saveRestaurant()">
-      <div>
-      <label>Name:</label>
-      <input v-model="newRestaurant.name" required />
-      </div>
-
-      <div>
-        <label>District:</label>
-        <input v-model="newRestaurant.district" required />
-      </div>
-
-      <div>
-        <label>Address:</label>
-        <input v-model="newRestaurant.address" required />
-      </div>
-
-      <div>
-        <label>Category:</label>
-        <select v-model="newRestaurant.category" required>
-          <option v-for="category in categoryOptions" :key="category" :value="category">
-            {{ category.replace('_', ' ') }}
-          </option>
-        </select>
-      </div>
-
-      <button type="submit">{{ isUpdating ? 'Update' : 'Add' }}</button>
-    </form>
   </div>
 </template>
 
@@ -122,6 +126,10 @@ export default {
       if (confirm('This action will also delete all associated reviews. Proceed?')) {
         axios.delete(`http://localhost:8080/restaurants/${id}`).then(() => this.getAllRestaurants());
       }
+    },
+    resetForm() {
+      this.newRestaurant = { name: '', district: '', address: '', category: '' };
+      this.isUpdating = false;
     },
     sortBy(sortKey) {
       if (sortKey === this.sortKey) {

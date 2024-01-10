@@ -3,8 +3,8 @@
 
 <template>
   <div>
-    <h1>Restaurant Reviews</h1>
-
+    <h1>Reviews</h1>
+    <p>Add a new review:</p>
     <form @submit.prevent="isUpdating ? updateReview(selectedReview.id) : saveReview()">
       <label>Author:</label>
       <input v-model="newReview.author" required />
@@ -27,6 +27,7 @@
       <input v-model="newReview.comment" required />
 
       <button type="submit">{{ isUpdating ? 'Update' : 'Add' }}</button>
+      <button type="button" @click="resetForm">Cancel</button>
     </form>
 
     <div v-for="restaurant in restaurants" :key="restaurant.id">
@@ -50,7 +51,7 @@
         <tr v-for="review in restaurant.reviews" :key="review.id">
           <td>{{ review.id }}</td>
           <td>{{ review.author }}</td>
-          <td>{{ review.rating }}</td>
+          <td>{{ review.rating.replace('_', ' ') }}</td>
           <td>{{ review.comment }}</td>
           <td>
             <button @click="preUpdateReview(review.id)">Edit</button>
@@ -158,6 +159,10 @@ export default {
       if (confirm('This action is irreversible. Proceed?')) {
         axios.delete(`http://localhost:8080/reviews/${id}`).then(() => this.getAllReviews());
       }
+    },
+    resetForm() {
+      this.newReview = { author: '', restaurant_id: '', rating: '', comment: '' };
+      this.isUpdating = false;
     },
     sortBy(sortKey) {
       if (sortKey === this.sortKey) {
