@@ -42,7 +42,11 @@
       <input v-model="newRestaurant.address" required />
 
       <label>Category:</label>
-      <input v-model="newRestaurant.category" required />
+      <select v-model="newRestaurant.category" required>
+        <option v-for="category in categoryOptions" :key="category" :value="category">
+          {{ category.replace('_', ' ') }}
+        </option>
+      </select>
 
       <button type="submit">{{ isUpdating ? 'Update' : 'Add' }}</button>
     </form>
@@ -66,6 +70,18 @@ export default {
       isUpdating: false,
       sortKey: '',
       sortOrder: 'asc',
+      categoryOptions: [
+        'VIETNAMESE',
+        'SRI_LANKAN',
+        'KOREAN',
+        'JAPANESE',
+        'CHINESE',
+        'THAI',
+        'ITALIAN',
+        'GREEK',
+        'INDIAN',
+        'OTHER'
+      ],
     };
   },
   methods: {
@@ -95,21 +111,23 @@ export default {
       })
     },
     deleteRestaurant(id) {
-      axios.delete(`http://localhost:8080/restaurants/${id}`).then(() => this.getAllRestaurants());
+      if (confirm('This action will also delete all associated reviews. Proceed?')) {
+        axios.delete(`http://localhost:8080/restaurants/${id}`).then(() => this.getAllRestaurants());
+      }
     },
     sortBy(sortKey) {
       if (sortKey === this.sortKey) {
-        // Toggle the sort order if it's the same column
+        // Toggle sort order if it's the same column
         this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
       } else {
         this.sortKey = sortKey;
         this.sortOrder = 'asc';
       }
-      this.getAllRestaurants(); // Refresh the data with the new sorting criteria
+      this.getAllRestaurants(); // Refresh with the new sorting criteria
     },
   },
   mounted() {
-    // Fetch restaurants when the component is mounted
+    // Fetch restaurants when the component is mounted?
     this.getAllRestaurants();
   },
   computed: {
