@@ -129,9 +129,9 @@ export default {
             this.newReview = { author: '', restaurant_id: '', rating: '', comment: '' }; // Clear form
           })
     },
-    preUpdateReview(id) {
+    async preUpdateReview(id) {
       this.isUpdating = true;
-      this.getReviewById(id);
+      await axios.get(`http://localhost:8080/reviews/${id}`).then(response => {this.selectedReview = response.data});
       this.newReview = {
         author: this.selectedReview.author,
         comment: this.selectedReview.comment,

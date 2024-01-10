@@ -105,9 +105,9 @@ export default {
         this.newRestaurant = { name: '', district: '', address: '', category: '' }; // Clear form
       });
     },
-    preUpdateRestaurant(id) {
+    async preUpdateRestaurant(id) {
       this.isUpdating = true;
-      this.getRestaurantById(id);
+      await axios.get(`http://localhost:8080/restaurants/${id}`).then(response => {this.selectedRestaurant = response.data});
       this.newRestaurant = this.selectedRestaurant;
     },
     updateRestaurant(id) {
