@@ -5,29 +5,43 @@
   <div>
     <h1>Reviews</h1>
     <p>Add a new review:</p>
+
     <form @submit.prevent="isUpdating ? updateReview(selectedReview.id) : saveReview()">
-      <label>Author:</label>
-      <input v-model="newReview.author" required />
+      <div>
+        <label>Author:</label>
+        <input v-model="newReview.author" required />
+      </div>
 
-      <label>Restaurant:</label>
-      <select v-model="newReview.restaurant_id" required>
-        <option v-for="restaurant in restaurants" :key="restaurant.id" :value="restaurant.id">
-          {{ restaurant.name }}
-        </option>
-      </select>
+      <div>
+        <label>Restaurant:</label>
+        <select v-model="newReview.restaurant_id" required>
+          <option v-for="restaurant in restaurants" :key="restaurant.id" :value="restaurant.id">
+            {{ restaurant.name }}
+          </option>
+        </select>
+      </div>
 
-      <label>Rating:</label>
-      <select v-model="newReview.rating" required>
-        <option v-for="rating in ratingOptions" :key="rating.text" :value="rating.text">
-          {{ rating.stars }}
-        </option>
-      </select>
+      <div>
+        <label>Rating:</label>
+        <select v-model="newReview.rating" required>
+          <option v-for="rating in ratingOptions" :key="rating.text" :value="rating.text">
+            {{ rating.stars }}
+          </option>
+        </select>
+      </div>
 
-      <label>Comment:</label>
-      <input v-model="newReview.comment" required />
+      <div>
+        <label>Comment:</label>
+        <input v-model="newReview.comment" required />
+      </div>
 
-      <button type="submit">{{ isUpdating ? 'Update' : 'Add' }}</button>
-      <button type="button" @click="resetForm">Cancel</button>
+      <div>
+        <button type="submit">{{ isUpdating ? 'Update' : 'Add' }}</button>
+        <button type="button" @click="resetForm">Cancel</button>
+      </div>
+
+      <div></div>
+
     </form>
 
     <div v-for="restaurant in restaurants" :key="restaurant.id">
