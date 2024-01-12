@@ -162,7 +162,7 @@ export default {
         restaurant: { id: this.newReview.restaurant_id }
       };
       axios.put(`http://localhost:8080/reviews/${id}`, reviewToSave).then(() => {
-        this.getAllRestaurants();
+        this.getAllRestaurants(); //Refresh
         this.getAllReviews(); // Refresh
         this.isUpdating = false; // Reset updating mode
         this.selectedReview = null;
@@ -171,7 +171,10 @@ export default {
     },
     deleteReview(id) {
       if (confirm('This action is irreversible. Proceed?')) {
-        axios.delete(`http://localhost:8080/reviews/${id}`).then(() => this.getAllReviews());
+        axios.delete(`http://localhost:8080/reviews/${id}`).then(() => {
+          this.getAllRestaurants();
+          this.getAllReviews();
+        })
       }
     },
     resetForm() {
@@ -180,13 +183,13 @@ export default {
     },
     sortBy(sortKey) {
       if (sortKey === this.sortKey) {
-        // Toggle sort order if it's the same column
+        // Toggle sort order in same column
         this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
       } else {
         this.sortKey = sortKey;
         this.sortOrder = 'asc';
       }
-      this.getAllReviews(); // Refresh with the new sorting criteria
+      this.getAllReviews(); // Refresh with the new sorting
     },
   },
   mounted() {
