@@ -61,6 +61,7 @@
         <th @click="sortBy('district')">District</th>
         <th>Address</th>
         <th @click="sortBy('category')">Category</th>
+        <th @click="sortBy('averageRating')">Rating</th>
         <th>Actions</th>
       </tr>
       </thead>
@@ -73,6 +74,7 @@
         <td>{{ restaurant.district }}</td>
         <td>{{ restaurant.address }}</td>
         <td>{{ restaurant.category.replace('_', ' ') }}</td>
+        <td>{{ restaurant.averageRating }}</td>
         <td>
           <button @click="preUpdateRestaurant(restaurant.id)">Edit</button>
           <button @click="deleteRestaurant(restaurant.id)">Delete</button>
@@ -101,6 +103,14 @@ export default {
       isUpdating: false,
       sortKey: '',
       sortOrder: 'asc',
+      ratingOptions: [
+        { stars: '', text: 'NO_RATING', value: 0},
+        { stars: '★☆☆☆☆', text: 'POOR', value: 1},
+        { stars: '★★☆☆☆', text: 'BELOW_AVERAGE', value: 2},
+        { stars: '★★★☆☆', text: 'AVERAGE', value: 3},
+        { stars: '★★★★☆', text: 'GOOD', value: 4},
+        { stars: '★★★★★', text: 'EXCELLENT', value: 5}
+      ],
       categoryOptions: [
         'VIETNAMESE',
         'SRI_LANKAN',
@@ -161,16 +171,34 @@ export default {
         this.sortKey = sortKey;
         this.sortOrder = 'asc';
       }
-      this.getAllRestaurants(); // Refresh with the new sorting criteria
     },
   },
   mounted() {
     this.getAllRestaurants();
   },
   computed: {
+    ratingValueMap() {
+      const map = {};
+      this.ratingOptions.forEach(option => {
+        map[option.text] = option.value;
+      });
+      return map;
+    },
     sortedRestaurants() {
+      const restaurantsWithAverageRating = this.restaurants.map(restaurant => {
+        const validReviews = restaurant.reviews.filter(review => review.rating !== 'NO_RATING');
+        let averageRating = 0;
+        if (validReviews.length > 0) {
+          const totalRating = validReviews.reduce((acc, review) => acc + this.ratingValueMap[review.rating], 0);
+          averageRating = totalRating / validReviews.length;
+        }
+
+        // Return the restaurant with its average rating
+        return { ...restaurant, averageRating: averageRating.toFixed(2) };
+      });
+
       // filter restaurants based on search and filter criteria
-      const filteredRestaurants = this.restaurants.filter(restaurant => {
+      const filteredRestaurants = restaurantsWithAverageRating.filter(restaurant => {
         const matchesSearch = this.searchQuery.length === 0 || restaurant.name.toLowerCase().includes(this.searchQuery.toLowerCase());
         const matchesDistrict = this.filterDistrict.length === 0 || restaurant.district === this.filterDistrict;
         const matchesCategory = this.filterCategory.length === 0 || restaurant.category === this.filterCategory;
@@ -179,12 +207,15 @@ export default {
 
       // sort filtered restaurants
       return filteredRestaurants.sort((a, b) => {
-        const sortKey = this.sortKey;
-        const sortOrder = this.sortOrder === 'asc' ? 1 : -1;
-
-        if (a[sortKey] < b[sortKey]) return -sortOrder;
-        if (a[sortKey] > b[sortKey]) return sortOrder;
-        return 0;
+        if (this.sortKey === 'averageRating') {
+          return (this.sortOrder === 'asc' ? 1 : -1) * (parseFloat(a.averageRating) - parseFloat(b.averageRating));
+        } else {
+          const sortKey = this.sortKey;
+          const sortOrder = this.sortOrder === 'asc' ? 1 : -1;
+          if (a[sortKey] < b[sortKey]) return -sortOrder;
+          if (a[sortKey] > b[sortKey]) return sortOrder;
+          return 0;
+        }
       });
     },
     uniqueDistricts() {

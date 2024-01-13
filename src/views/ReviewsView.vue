@@ -20,6 +20,7 @@
           {{ category.replace('_', ' ') }}
         </option>
       </select>
+      <button @click="sortBy('averageRating')" style="margin-bottom: 1rem;">Sort by Average Rating</button>
     </div>
 
     <p class="intro2">Add a new review:</p>
@@ -58,14 +59,13 @@
         <button type="button" @click="resetForm">Cancel</button>
       </div>
 
-      <div></div>
-
     </form>
 
     <div v-for="restaurant in sortedRestaurants" :key="restaurant.id" :id="'restaurant-' + restaurant.id" style="margin-top: 2rem;">
       <h2>
         <router-link :to="{ name: 'restaurantReviews', params: { id: restaurant.id }}">{{ restaurant.name }}</router-link>
       </h2>
+      <p>Average Rating: {{ restaurant.averageRating }}</p>
       <p>District: {{ restaurant.district }}</p>
       <p>Address: {{ restaurant.address }}</p>
       <p>Category: {{ restaurant.category }}</p>
@@ -217,13 +217,11 @@ export default {
     },
     sortBy(sortKey) {
       if (sortKey === this.sortKey) {
-        // Toggle sort order in same column
         this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
       } else {
         this.sortKey = sortKey;
         this.sortOrder = 'asc';
       }
-      this.getAllReviews(); // Refresh with the new sorting
     },
   },
   mounted() {
@@ -241,9 +239,28 @@ export default {
         return 0;
       });
     },
+    ratingValueMap() {
+      const map = {};
+      this.ratingOptions.forEach(option => {
+        map[option.text] = option.value;
+      });
+      return map;
+    },
     sortedRestaurants() {
+      const restaurantsWithAverageRating = this.restaurants.map(restaurant => {
+        const validReviews = restaurant.reviews.filter(review => review.rating !== 'NO_RATING');
+        let averageRating = 0;
+        if (validReviews.length > 0) {
+          const totalRating = validReviews.reduce((acc, review) => acc + this.ratingValueMap[review.rating], 0);
+          averageRating = totalRating / validReviews.length;
+        }
+
+        // Return the restaurant with its average rating
+        return { ...restaurant, averageRating: averageRating.toFixed(2) };
+      });
+
       // filter restaurants based on search and filter criteria
-      const filteredRestaurants = this.restaurants.filter(restaurant => {
+      const filteredRestaurants = restaurantsWithAverageRating.filter(restaurant => {
         const matchesSearch = this.searchQuery.length === 0 || restaurant.name.toLowerCase().includes(this.searchQuery.toLowerCase());
         const matchesDistrict = this.filterDistrict.length === 0 || restaurant.district === this.filterDistrict;
         const matchesCategory = this.filterCategory.length === 0 || restaurant.category === this.filterCategory;
@@ -252,12 +269,15 @@ export default {
 
       // sort filtered restaurants
       return filteredRestaurants.sort((a, b) => {
-        const sortKey = this.sortKey;
-        const sortOrder = this.sortOrder === 'asc' ? 1 : -1;
-
-        if (a[sortKey] < b[sortKey]) return -sortOrder;
-        if (a[sortKey] > b[sortKey]) return sortOrder;
-        return 0;
+        if (this.sortKey === 'averageRating') {
+          return (this.sortOrder === 'asc' ? 1 : -1) * (parseFloat(a.averageRating) - parseFloat(b.averageRating));
+        } else {
+          const sortKey = this.sortKey;
+          const sortOrder = this.sortOrder === 'asc' ? 1 : -1;
+          if (a[sortKey] < b[sortKey]) return -sortOrder;
+          if (a[sortKey] > b[sortKey]) return sortOrder;
+          return 0;
+        }
       });
     },
     uniqueDistricts() {
