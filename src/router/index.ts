@@ -20,7 +20,12 @@ const router = createRouter({
       path: '/restaurants',
       name: 'restaurants',
       component: RestaurantsView
-    }
+    },
+    {
+      path: '/reviews/restaurant/:restaurantId', // :restaurantId parameter
+      name: 'restaurantReviews',
+      component: ReviewsView
+    },
   ]
 })
 

@@ -1,10 +1,10 @@
-<script setup lang="js">
+<script setup>
 </script>
 
 <template>
   <div>
     <h1>Reviews</h1>
-    <p>Add a new review:</p>
+    <p class="intro1">Add a new review:</p>
 
     <form @submit.prevent="isUpdating ? updateReview(selectedReview.id) : saveReview()">
       <div>
@@ -44,7 +44,7 @@
 
     </form>
 
-    <div v-for="restaurant in restaurants" :key="restaurant.id">
+    <div v-for="restaurant in restaurants" :key="restaurant.id" :ref="'restaurant-' + restaurant.id" style="margin-top: 2rem;">
       <h2>{{ restaurant.name }}</h2>
       <p>District: {{ restaurant.district }}</p>
       <p>Address: {{ restaurant.address }}</p>
@@ -82,6 +82,7 @@
 
 <script>
 import axios from "axios";
+import {useRoute} from "vue-router";
 
 export default {
   data() {
@@ -191,10 +192,24 @@ export default {
       }
       this.getAllReviews(); // Refresh with the new sorting
     },
+    scrollToRestaurant(restaurantId) {
+      this.$nextTick(() => {
+        const element = this.$refs[`restaurant-${restaurantId}`][0];
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    },
   },
   mounted() {
-    this.getAllRestaurants();
-    this.getAllReviews();
+    this.getAllRestaurants(); //Refresh
+    this.getAllReviews(); //Refresh
+    this.$nextTick(() => {
+      const restaurantId = this.$route.params.restaurantId;
+      if (restaurantId) {
+        this.scrollToRestaurant(restaurantId);
+      }
+    });
   },
   computed: {
     sortedReviews() {
@@ -214,6 +229,10 @@ export default {
 <style scoped>
 table, th, td {
   border: 1px solid;
+}
+.intro1 {
+  margin-top: 1rem;
+  padding-bottom: 1rem;
 }
 </style>
 

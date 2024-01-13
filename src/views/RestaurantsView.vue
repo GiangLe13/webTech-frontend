@@ -1,30 +1,47 @@
-<script setup lang="js">
+<script setup>
 </script>
 
 <template>
   <div>
     <h1>Restaurants</h1>
 
-    <p>Add a new restaurant:</p>
-    <!-- Component? -->
+    <p class="intro1">Search for restaurants:</p>
+    <div>
+      <input type="text" v-model="searchQuery" placeholder="Search Restaurants">
+      <select v-model="filterDistrict">
+        <option value="">All Districts</option>
+        <option v-for="district in uniqueDistricts" :key="district" :value="district">
+          {{ district }}
+        </option>
+      </select>
+      <select v-model="filterCategory">
+        <option value="">All Categories</option>
+        <option v-for="category in categoryOptions" :key="category" :value="category">
+          {{ category.replace('_', ' ') }}
+        </option>
+      </select>
+    </div>
+
+    <p class="intro2">Add a new restaurant:</p>
+
     <form @submit.prevent="isUpdating ? updateRestaurant(selectedRestaurant.id) : saveRestaurant()">
       <div>
-        <label>Name:</label>
+        <label>Name:  </label>
         <input v-model="newRestaurant.name" required />
       </div>
 
       <div>
-        <label>District:</label>
+        <label>District:  </label>
         <input v-model="newRestaurant.district" required />
       </div>
 
       <div>
-        <label>Address:</label>
+        <label>Address:  </label>
         <input v-model="newRestaurant.address" required />
       </div>
 
       <div>
-        <label>Category:</label>
+        <label>Category:  </label>
         <select v-model="newRestaurant.category" required>
           <option v-for="category in categoryOptions" :key="category" :value="category">
             {{ category.replace('_', ' ') }}
@@ -50,7 +67,9 @@
       <tbody>
       <tr v-for="restaurant in sortedRestaurants" :key="restaurant.id">
         <td>{{ restaurant.id }}</td>
-        <td>{{ restaurant.name }}</td>
+        <td>
+          <router-link :to="{ name: 'restaurantReviews', params: { restaurantId: restaurant.id }}">{{ restaurant.name }}</router-link>
+        </td>
         <td>{{ restaurant.district }}</td>
         <td>{{ restaurant.address }}</td>
         <td>{{ restaurant.category.replace('_', ' ') }}</td>
@@ -94,6 +113,9 @@ export default {
         'INDIAN',
         'OTHER'
       ],
+      searchQuery: '',
+      filterDistrict: '',
+      filterCategory: '',
     };
   },
   methods: {
@@ -143,12 +165,20 @@ export default {
     },
   },
   mounted() {
-    // Fetch restaurants when the component is mounted?
     this.getAllRestaurants();
   },
   computed: {
     sortedRestaurants() {
-      return this.restaurants.slice().sort((a, b) => {
+      // First, filter the restaurants based on search and filter criteria
+      const filteredRestaurants = this.restaurants.filter(restaurant => {
+        const matchesSearch = this.searchQuery.length === 0 || restaurant.name.toLowerCase().includes(this.searchQuery.toLowerCase());
+        const matchesDistrict = this.filterDistrict.length === 0 || restaurant.district === this.filterDistrict;
+        const matchesCategory = this.filterCategory.length === 0 || restaurant.category === this.filterCategory;
+        return matchesSearch && matchesDistrict && matchesCategory;
+      });
+
+      // Then, sort the filtered restaurants
+      return filteredRestaurants.sort((a, b) => {
         const sortKey = this.sortKey;
         const sortOrder = this.sortOrder === 'asc' ? 1 : -1;
 
@@ -157,6 +187,10 @@ export default {
         return 0;
       });
     },
+    uniqueDistricts() {
+      const districts = this.restaurants.map(restaurant => restaurant.district);
+      return [...new Set(districts)].sort();
+    },
   }
 };
 </script>
@@ -164,6 +198,12 @@ export default {
 <style scoped>
 table, th, td {
   border: 1px solid;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+.intro1, .intro2 {
+  margin-top: 1rem;
+  padding-bottom: 1rem;
 }
 </style>
 
