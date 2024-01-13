@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import RestaurantsView from '../views/RestaurantsView.vue'
 import ReviewsView from '../views/ReviewsView.vue'
+import ResReviewsView from '../views/ResReviewsView.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -22,9 +23,9 @@ const router = createRouter({
       component: RestaurantsView
     },
     {
-      path: '/reviews/restaurant/:restaurantId', // :restaurantId parameter
+      path: '/restaurants/:id',
       name: 'restaurantReviews',
-      component: ReviewsView
+      component: ResReviewsView
     },
   ]
 })

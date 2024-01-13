@@ -68,7 +68,7 @@
       <tr v-for="restaurant in sortedRestaurants" :key="restaurant.id">
         <td>{{ restaurant.id }}</td>
         <td>
-          <router-link :to="{ name: 'restaurantReviews', params: { restaurantId: restaurant.id }}">{{ restaurant.name }}</router-link>
+          <router-link :to="{ name: 'restaurantReviews', params: { id: restaurant.id }}">{{ restaurant.name }}</router-link>
         </td>
         <td>{{ restaurant.district }}</td>
         <td>{{ restaurant.address }}</td>
@@ -169,7 +169,7 @@ export default {
   },
   computed: {
     sortedRestaurants() {
-      // First, filter the restaurants based on search and filter criteria
+      // filter restaurants based on search and filter criteria
       const filteredRestaurants = this.restaurants.filter(restaurant => {
         const matchesSearch = this.searchQuery.length === 0 || restaurant.name.toLowerCase().includes(this.searchQuery.toLowerCase());
         const matchesDistrict = this.filterDistrict.length === 0 || restaurant.district === this.filterDistrict;
@@ -177,7 +177,7 @@ export default {
         return matchesSearch && matchesDistrict && matchesCategory;
       });
 
-      // Then, sort the filtered restaurants
+      // sort filtered restaurants
       return filteredRestaurants.sort((a, b) => {
         const sortKey = this.sortKey;
         const sortOrder = this.sortOrder === 'asc' ? 1 : -1;

@@ -4,34 +4,16 @@
 <template>
   <div>
     <h1>Reviews</h1>
-
-    <p class="intro1">Search for restaurants:</p>
-    <div>
-      <input type="text" v-model="searchQuery" placeholder="Search Restaurants">
-      <select v-model="filterDistrict">
-        <option value="">All Districts</option>
-        <option v-for="district in uniqueDistricts" :key="district" :value="district">
-          {{ district }}
-        </option>
-      </select>
-      <select v-model="filterCategory">
-        <option value="">All Categories</option>
-        <option v-for="category in categoryOptions" :key="category" :value="category">
-          {{ category.replace('_', ' ') }}
-        </option>
-      </select>
-    </div>
-
-    <p class="intro2">Add a new review:</p>
+    <p class="intro1">Add a new review:</p>
 
     <form @submit.prevent="isUpdating ? updateReview(selectedReview.id) : saveReview()">
       <div>
-        <label>Author:</label>
+        <label>Author:  </label>
         <input v-model="newReview.author" required />
       </div>
 
       <div>
-        <label>Restaurant:</label>
+        <label>Restaurant: </label>
         <select v-model="newReview.restaurant_id" required>
           <option v-for="restaurant in restaurants" :key="restaurant.id" :value="restaurant.id">
             {{ restaurant.name }}
@@ -40,7 +22,7 @@
       </div>
 
       <div>
-        <label>Rating:</label>
+        <label>Rating:  </label>
         <select v-model="newReview.rating" required>
           <option v-for="rating in ratingOptions" :key="rating.text" :value="rating.text">
             {{ rating.stars }}
@@ -49,7 +31,7 @@
       </div>
 
       <div>
-        <label>Comment:</label>
+        <label>Comment:  </label>
         <input v-model="newReview.comment" required />
       </div>
 
@@ -62,10 +44,8 @@
 
     </form>
 
-    <div v-for="restaurant in sortedRestaurants" :key="restaurant.id" :id="'restaurant-' + restaurant.id" style="margin-top: 2rem;">
-      <h2>
-        <router-link :to="{ name: 'restaurantReviews', params: { id: restaurant.id }}">{{ restaurant.name }}</router-link>
-      </h2>
+    <div v-for="restaurant in restaurants" :key="restaurant.id" style="margin-top: 2rem;">
+      <h2>{{ restaurant.name }}</h2>
       <p>District: {{ restaurant.district }}</p>
       <p>Address: {{ restaurant.address }}</p>
       <p>Category: {{ restaurant.category }}</p>
@@ -102,6 +82,7 @@
 
 <script>
 import axios from "axios";
+import {useRoute} from "vue-router";
 export default {
   data() {
     return {
@@ -125,35 +106,23 @@ export default {
         { stars: '★★★☆☆', text: 'AVERAGE', value: 3},
         { stars: '★★★★☆', text: 'GOOD', value: 4},
         { stars: '★★★★★', text: 'EXCELLENT', value: 5}
-      ],
-      categoryOptions: [
-        'VIETNAMESE',
-        'SRI_LANKAN',
-        'KOREAN',
-        'JAPANESE',
-        'CHINESE',
-        'THAI',
-        'ITALIAN',
-        'GREEK',
-        'INDIAN',
-        'OTHER'
-      ],
-      searchQuery: '',
-      filterDistrict: '',
-      filterCategory: '',
+      ]
     };
   },
   methods: {
     getAllRestaurants() {
-      axios.get('http://localhost:8080/restaurants').then(response => {
-        this.restaurants = response.data;
+      axios.get('http://localhost:8080/restaurants').then(response => (this.restaurants = response.data));
+    },
+    getRestaurantById(id) {
+      axios.get(`http://localhost:8080/restaurants/${id}`).then(response => {
+        this.restaurants.push(response.data);
         this.reviewToRestaurantMap = {};
         this.restaurants.forEach(restaurant => {
           restaurant.reviews.forEach(review => {
             this.reviewToRestaurantMap[review.id] = restaurant.id;
           });
         });
-      })
+      });
     },
     getRestaurantNameById(restaurant_id) {
       const restaurant = this.restaurants.find(r => r.restaurant_id === restaurant_id);
@@ -173,8 +142,9 @@ export default {
         restaurant: { id: this.newReview.restaurant_id } // Ensuring the correct format
       };
       axios.post('http://localhost:8080/reviews', reviewToSave).then(() => {
-        this.getAllRestaurants(); // Refresh
-        this.getAllReviews(); // Refresh
+        //this.getRestaurantById(reviewToSave.restaurant.id); // Refresh
+        //this.getAllReviews(); // Refresh
+        location.reload();
         this.newReview = { author: '', restaurant_id: '', rating: '', comment: '' }; // Clear form
       })
     },
@@ -196,8 +166,9 @@ export default {
         restaurant: { id: this.newReview.restaurant_id }
       };
       axios.put(`http://localhost:8080/reviews/${id}`, reviewToSave).then(() => {
-        this.getAllRestaurants(); //Refresh
-        this.getAllReviews(); // Refresh
+        //this.getRestaurantById(route.params.id); //Refresh
+        //this.getAllReviews(); // Refresh
+        location.reload();
         this.isUpdating = false; // Reset updating mode
         this.selectedReview = null;
         this.newReview = { author: '', restaurant_id: '', rating: '', comment: '' }; // Clear form
@@ -206,8 +177,9 @@ export default {
     deleteReview(id) {
       if (confirm('This action is irreversible. Proceed?')) {
         axios.delete(`http://localhost:8080/reviews/${id}`).then(() => {
-          this.getAllRestaurants();
-          this.getAllReviews();
+          //this.getRestaurantById(route.params.id);
+          //this.getAllReviews();
+          location.reload();
         })
       }
     },
@@ -227,7 +199,7 @@ export default {
     },
   },
   mounted() {
-    this.getAllRestaurants(); //Refresh
+    this.getRestaurantById(useRoute().params.id);
     this.getAllReviews(); //Refresh
   },
   computed: {
@@ -241,29 +213,6 @@ export default {
         return 0;
       });
     },
-    sortedRestaurants() {
-      // filter restaurants based on search and filter criteria
-      const filteredRestaurants = this.restaurants.filter(restaurant => {
-        const matchesSearch = this.searchQuery.length === 0 || restaurant.name.toLowerCase().includes(this.searchQuery.toLowerCase());
-        const matchesDistrict = this.filterDistrict.length === 0 || restaurant.district === this.filterDistrict;
-        const matchesCategory = this.filterCategory.length === 0 || restaurant.category === this.filterCategory;
-        return matchesSearch && matchesDistrict && matchesCategory;
-      });
-
-      // sort filtered restaurants
-      return filteredRestaurants.sort((a, b) => {
-        const sortKey = this.sortKey;
-        const sortOrder = this.sortOrder === 'asc' ? 1 : -1;
-
-        if (a[sortKey] < b[sortKey]) return -sortOrder;
-        if (a[sortKey] > b[sortKey]) return sortOrder;
-        return 0;
-      });
-    },
-    uniqueDistricts() {
-      const districts = this.restaurants.map(restaurant => restaurant.district);
-      return [...new Set(districts)].sort();
-    },
   }
 };
 </script>
@@ -272,7 +221,7 @@ export default {
 table, th, td {
   border: 1px solid;
 }
-.intro1, .intro2 {
+.intro1 {
   margin-top: 1rem;
   padding-bottom: 1rem;
 }
