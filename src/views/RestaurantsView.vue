@@ -130,24 +130,34 @@ export default {
   },
   methods: {
     getAllRestaurants() {
-      axios.get('http://localhost:8080/restaurants').then(response => (this.restaurants = response.data));
+      const baseUrl = import.meta.env.VITE_BACKEND_BASE_URL;
+      const endpoint = baseUrl + '/restaurants';
+      axios.get(endpoint).then(response => (this.restaurants = response.data));
     },
     getRestaurantById(id) {
-      axios.get(`http://localhost:8080/restaurants/${id}`).then(response => {this.selectedRestaurant = response.data});
+      const baseUrl = import.meta.env.VITE_BACKEND_BASE_URL;
+      const endpoint = baseUrl + `/restaurants/${id}`;
+      axios.get(endpoint).then(response => {this.selectedRestaurant = response.data});
     },
     saveRestaurant() {
-      axios.post('http://localhost:8080/restaurants', this.newRestaurant).then(() => {
+      const baseUrl = import.meta.env.VITE_BACKEND_BASE_URL;
+      const endpoint = baseUrl + '/restaurants';
+      axios.post(endpoint, this.newRestaurant).then(() => {
         this.getAllRestaurants(); // Refresh
         this.newRestaurant = { name: '', district: '', address: '', category: '' }; // Clear form
       });
     },
     async preUpdateRestaurant(id) {
+      const baseUrl = import.meta.env.VITE_BACKEND_BASE_URL;
+      const endpoint = baseUrl + `/restaurants/${id}`;
       this.isUpdating = true;
-      await axios.get(`http://localhost:8080/restaurants/${id}`).then(response => {this.selectedRestaurant = response.data});
+      await axios.get(endpoint).then(response => {this.selectedRestaurant = response.data});
       this.newRestaurant = this.selectedRestaurant;
     },
     updateRestaurant(id) {
-      axios.put(`http://localhost:8080/restaurants/${id}`, this.newRestaurant).then(() => {
+      const baseUrl = import.meta.env.VITE_BACKEND_BASE_URL;
+      const endpoint = baseUrl + `/restaurants/${id}`;
+      axios.put(endpoint, this.newRestaurant).then(() => {
         this.getAllRestaurants(); // Refresh
         this.isUpdating = false; // Reset updating mode
         this.selectedRestaurant = null;
@@ -155,8 +165,10 @@ export default {
       })
     },
     deleteRestaurant(id) {
+      const baseUrl = import.meta.env.VITE_BACKEND_BASE_URL;
+      const endpoint = baseUrl + `/restaurants/${id}`;
       if (confirm('This action will also delete all associated reviews. Proceed?')) {
-        axios.delete(`http://localhost:8080/restaurants/${id}`).then(() => this.getAllRestaurants());
+        axios.delete(endpoint).then(() => this.getAllRestaurants());
       }
     },
     resetForm() {

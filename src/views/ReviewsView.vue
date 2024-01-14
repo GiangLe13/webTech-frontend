@@ -145,7 +145,9 @@ export default {
   },
   methods: {
     getAllRestaurants() {
-      axios.get('http://localhost:8080/restaurants').then(response => {
+      const baseUrl = import.meta.env.VITE_BACKEND_BASE_URL;
+      const endpoint = baseUrl + '/restaurants';
+      axios.get(endpoint).then(response => {
         this.restaurants = response.data;
         this.reviewToRestaurantMap = {};
         this.restaurants.forEach(restaurant => {
@@ -160,27 +162,35 @@ export default {
       return restaurant ? restaurant.name : 'Unknown';
     },
     getAllReviews() {
-      axios.get('http://localhost:8080/reviews').then(response => (this.reviews = response.data));
+      const baseUrl = import.meta.env.VITE_BACKEND_BASE_URL;
+      const endpoint = baseUrl + '/reviews';
+      axios.get(endpoint).then(response => (this.reviews = response.data));
     },
     getReviewById(id) {
-      axios.get(`http://localhost:8080/reviews/${id}`).then(response => {this.selectedReview = response.data});
+      const baseUrl = import.meta.env.VITE_BACKEND_BASE_URL;
+      const endpoint = baseUrl + `/reviews/${id}`;
+      axios.get(endpoint).then(response => {this.selectedReview = response.data});
     },
     saveReview() {
+      const baseUrl = import.meta.env.VITE_BACKEND_BASE_URL;
+      const endpoint = baseUrl + '/reviews';
       const reviewToSave = {
         author: this.newReview.author,
         rating: this.newReview.rating,
         comment: this.newReview.comment,
         restaurant: { id: this.newReview.restaurant_id } // Ensuring the correct format
       };
-      axios.post('http://localhost:8080/reviews', reviewToSave).then(() => {
+      axios.post(endpoint, reviewToSave).then(() => {
         this.getAllRestaurants(); // Refresh
         this.getAllReviews(); // Refresh
         this.newReview = { author: '', restaurant_id: '', rating: '', comment: '' }; // Clear form
       })
     },
     async preUpdateReview(id) {
+      const baseUrl = import.meta.env.VITE_BACKEND_BASE_URL;
+      const endpoint = baseUrl + `/reviews/${id}`;
       this.isUpdating = true;
-      await axios.get(`http://localhost:8080/reviews/${id}`).then(response => {this.selectedReview = response.data});
+      await axios.get(endpoint).then(response => {this.selectedReview = response.data});
       this.newReview = {
         author: this.selectedReview.author,
         comment: this.selectedReview.comment,
@@ -189,13 +199,15 @@ export default {
       };
     },
     updateReview(id) {
+      const baseUrl = import.meta.env.VITE_BACKEND_BASE_URL;
+      const endpoint = baseUrl + `/reviews/${id}`;
       const reviewToSave = {
         author: this.newReview.author,
         rating: this.newReview.rating,
         comment: this.newReview.comment,
         restaurant: { id: this.newReview.restaurant_id }
       };
-      axios.put(`http://localhost:8080/reviews/${id}`, reviewToSave).then(() => {
+      axios.put(endpoint, reviewToSave).then(() => {
         this.getAllRestaurants(); //Refresh
         this.getAllReviews(); // Refresh
         this.isUpdating = false; // Reset updating mode
@@ -204,8 +216,10 @@ export default {
       })
     },
     deleteReview(id) {
+      const baseUrl = import.meta.env.VITE_BACKEND_BASE_URL;
+      const endpoint = baseUrl + `/reviews/${id}`;
       if (confirm('This action is irreversible. Proceed?')) {
-        axios.delete(`http://localhost:8080/reviews/${id}`).then(() => {
+        axios.delete(endpoint).then(() => {
           this.getAllRestaurants();
           this.getAllReviews();
         })
