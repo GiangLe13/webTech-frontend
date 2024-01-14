@@ -68,7 +68,7 @@
       <p>Average Rating: {{ restaurant.averageRating }}</p>
       <p>District: {{ restaurant.district }}</p>
       <p>Address: {{ restaurant.address }}</p>
-      <p>Category: {{ restaurant.category }}</p>
+      <p>Category: {{ restaurant.category.replace('_', ' ') }}</p>
       <p>Reviews:</p>
 
       <table class="table">
