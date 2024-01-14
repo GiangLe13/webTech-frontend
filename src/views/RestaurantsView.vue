@@ -192,7 +192,6 @@ export default {
           const totalRating = validReviews.reduce((acc, review) => acc + this.ratingValueMap[review.rating], 0);
           averageRating = totalRating / validReviews.length;
         }
-
         // Return the restaurant with its average rating
         return { ...restaurant, averageRating: averageRating.toFixed(2) };
       });

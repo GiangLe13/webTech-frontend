@@ -248,7 +248,7 @@ export default {
     },
     sortedRestaurants() {
       const restaurantsWithAverageRating = this.restaurants.map(restaurant => {
-        const validReviews = restaurant.reviews.filter(review => review.rating !== 'NO_RATING');
+        const validReviews = restaurant.reviews?.filter(review => review.rating !== 'NO_RATING') || [];
         let averageRating = 0;
         if (validReviews.length > 0) {
           const totalRating = validReviews.reduce((acc, review) => acc + this.ratingValueMap[review.rating], 0);
